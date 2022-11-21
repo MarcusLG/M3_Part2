@@ -56,32 +56,63 @@ def simple_tabu_iterator():
     text_file = open("Output_simple_tabu.csv", "w")
     text_file.write("Current_iter,current_cost,below_max_cap,APH,BPH,CPH,DPH,APJ,BPJ,CPJ,DPJ,APL,BPL,CPL,DPL,APT,BPT,CPT,DPT,AQH,BQH,CQH,DQH,AQJ,BQJ,CQJ,DQJ,AQL,BQL,CQL,DQL,AQT,BQT,CQT,DQT,ARH,BRH,CRH,DRH,ARJ,BRJ,CRJ,DRJ,ARL,BRL,CRL,DRL,ART,BRT,CRT,DRT,ASH,BSH,CSH,DSH,ASJ,BSJ,CSJ,DSJ,ASL,BSL,CSL,DSL,AST,BST,CST,DST")
     current_cost = evaluate_cost()
-    golden_production = deepcopy(case_param.production)
-    print_iter_interval = 5000
+    # This is the golden copy of the production quantity, we save it before changing the dynamic dictionary
+
+    # Here we save a copy of the initial state of the optimization (base-state)
+    current_list = [current_iter,current_cost,below_max_cap,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
+    text_file.write("\n%s" % str(current_list))
+
+    print_iter_interval = 5000    # This is the output interval for the iteration, console to print status every x print_iter_interval
     for current_iter in range(0, num_iter):
+        # Algorithm for simple tabu iteration:
+        # For every golden state (i.e. the current variables that will yield the lowest cost)
+        #    we perform a simple tabu search around its neighbour
+        #    bear in mind that we may find more than one steps that may result in a reduction of the cost
+        #    therefore we will do an exhaustive search to return only the step that yields the lowest cost
+        #    among all. This set of variables shall serve as the golden copy for the next iteration.
+        #    The iterations will stop when the maximum iterations have reached or a minimal (not guaranteed to
+        #    global), then the result is saved to the output_simple_tabu.csv file)
+        #    NOTE: Got to remember to reset / udpate the golden production at the end of the iteration
+        #          provided the iteration were to continue.
+        # Golden will serve as a copy of the previous state
+        golden_production = deepcopy(case_param.production)
+        # Next will hold the production quantities that to be updated with
+        next_production = deepcopy(case_param.production)
+        prev_best_cost = evaluate_cost() # Save the cost, i.e. best cost so far to be compared with
+        update_flag = False
+
         if current_iter % print_iter_interval == 0:
             print('Current iter: ', current_iter)
-        mc_iterator()
-        current_cost = evaluate_cost()
-        below_max_cap = True
-        for plant in case_param.plant:
-            if not capacity_check(plant):
-                below_max_cap = False
-            #below_max_cap & (capacity_check(plant))
-        if not below_max_cap:
-            continue
-        if len(top_x_list) <= top_x:
-            current_list = [current_iter,current_cost,below_max_cap,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
-            top_x_list.append(current_list)
-            top_x_cost.append(current_cost)
-        elif current_cost < max(top_x_cost):
-            current_list = [current_iter,current_cost,below_max_cap,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
-            list_idx = top_x_cost.index(max(top_x_cost))
-            top_x_cost[list_idx] = current_cost
-            top_x_list[list_idx] = current_list
-    for element in top_x_list:
-        text_file.write("\n%s" % str(element))
-            #text_file.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n" % (current_iter,current_cost,below_max_cap,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']))
+       
+        # Main loop to iterate through the number of plants / product / customers
+        for product in case_param.product:
+            for customer in case_param.customer:
+                # For each set of product-customer pair, we perform the neighbour search
+                for mode in [1,2,3]:
+                    for movement in [-1,1]: # Here we only run movement search for 2 steps
+                        # Here we pass the variables into the updater to update the value for the 
+                        simple_tabu_updater(product,customer,plant,mode,movement)
+                        current_cost = evaluate_cost()
+                        below_max_cap = True
+                        for plant in case_param.plant:
+                            if not capacity_check(plant):
+                                below_max_cap = False
+                        if not below_max_cap:
+                            # Well if the maximum capacity is exceeded, reset the state and continue
+                            case_param.production = deepcopy(golden_production)
+                            continue
+                        # Only check the cost if the capacity is not exceeded
+                        if current_cost < prev_best_cost:
+                            prev_best_cost = current_cost
+                            next_production = deepcopy(case_param.production)
+                            update_flag = True # We set this flag to True if there's any improvement, else iteration will break
+        case_param.production = deepcopy(next_production)
+        if not update_flag:
+            break
+    # End of iteration, restore the case_param.production to the best combination so far
+    current_cost = evaluate_cost()
+    current_list = [current_iter,current_cost,below_max_cap,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
+    text_file.write("\n%s" % str(current_list))
     text_file.close()
     time_stop = time.time()
     print("Total time elapse: ", time_stop - time_start, "s\n")
