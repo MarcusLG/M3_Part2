@@ -1,6 +1,7 @@
 import part2_class
-from math import floor
+from math import floor,exp
 from random import randint
+from numpy.random import rand
 import sys
 import time
 from copy import deepcopy
@@ -77,6 +78,7 @@ def simple_local_iterator(num_iter, rand_initializer=True, debug=False, record_b
         current_list = ["Base",current_cost,True,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
         text_file.write("\n%s" % str(current_list))
     print_iter_interval = 2    # This is the output interval for the iteration, console to print status every x print_iter_interval
+    total_iterations = 0
     for current_iter in range(0, num_iter):
         # Algorithm for simple tabu iteration:
         # For every golden state (i.e. the current variables that will yield the lowest cost)
@@ -105,6 +107,7 @@ def simple_local_iterator(num_iter, rand_initializer=True, debug=False, record_b
                     for movement in [-1,1,-2,2,-3,3,-4,4,-5,5,-6,6,-7,7,-8,8,-9,9,-10,10,-11,11,-12,12,-13,13]: # Here we only run movement search for 2 steps
                         for plant in ['A','B','C','D']:
                             # Here we pass the variables into the updater to update the value for the 
+                            total_iterations += 1
                             simple_local_updater(product,customer,plant,mode,movement)
                             current_cost = evaluate_cost()
                             if debug:
@@ -124,6 +127,8 @@ def simple_local_iterator(num_iter, rand_initializer=True, debug=False, record_b
                             if current_cost < prev_best_cost:
                                 prev_best_cost = current_cost
                                 next_production = deepcopy(case_param.production)
+                                current_list = [str(movement) + "-" + str(current_iter),prev_best_cost,True,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
+                                text_file.write("\n%s" % str(current_list))
                                 update_flag = True # We set this flag to True if there's any improvement, else iteration will break
                             else:
                                 case_param.production = deepcopy(next_production)
@@ -138,7 +143,8 @@ def simple_local_iterator(num_iter, rand_initializer=True, debug=False, record_b
     text_file.close()
     time_stop = time.time()
     print("Total time elapse: ", time_stop - time_start, "s\n")
-    print("Rate: ", (time_stop - time_start)/num_iter, "s/iteration\n")
+    print("Rate: ", (time_stop - time_start)/total_iterations, "s/iteration\n")
+    print("Total Iterations: ", total_iterations, "\n")
 
 def simple_local_initializer():
     # Function to initialize the production random and within bound
@@ -399,3 +405,124 @@ def hooke_jeeves_iterator(num_iter, rand_initializer=True, debug=False, record_b
     print("Total time elapse: ", time_stop - time_start, "s\n")
     print("Rate: ", (time_stop - time_start)/num_iter, "s/iteration\n")
 
+# simulated annealing algorithm
+def simulated_annealing(num_initialization, n_iterations, step_size, temp, overwrite=False):
+    for j in range(0, num_initialization):
+        # generate an initial point
+        #best = bounds[:, 0] + rand(len(bounds)) * (bounds[:, 1] - bounds[:, 0])    
+
+        # Hyperparameter (consider tuning these)
+        amount_change = 1    
+        t = temp
+        beta_param = 2
+        alpha_param = 0.9999
+
+        simple_local_initializer()    
+
+        # evaluate the initial point
+        #best_eval = objective(best)
+        best_eval = evaluate_cost()
+        best = deepcopy(case_param.production)
+        # current working solution
+        curr_eval = best_eval
+        curr = deepcopy(case_param.production)    
+
+        # Here we perform the routine to run the output-to-text file
+        if overwrite:
+            text_file = open("Output_SA.csv", "w")
+        else:
+            text_file = open("Output_SA.csv", "a")
+        text_file.write("\nCurrent_iter,current_cost,below_max_cap,APH,BPH,CPH,DPH,APJ,BPJ,CPJ,DPJ,APL,BPL,CPL,DPL,APT,BPT,CPT,DPT,AQH,BQH,CQH,DQH,AQJ,BQJ,CQJ,DQJ,AQL,BQL,CQL,DQL,AQT,BQT,CQT,DQT,ARH,BRH,CRH,DRH,ARJ,BRJ,CRJ,DRJ,ARL,BRL,CRL,DRL,ART,BRT,CRT,DRT,ASH,BSH,CSH,DSH,ASJ,BSJ,CSJ,DSJ,ASL,BSL,CSL,DSL,AST,BST,CST,DST")    
+
+        # run the algorithm
+        for i in range(n_iterations):
+            # take a step    
+
+            # Here we need a new function for the update rule
+            # candidate = curr + randn(len(bounds)) * step_size
+            gen_sa_candidate(step_size, amount_change)
+            # evaluate candidate point    
+
+            #candidate_eval = objective(candidate)
+            candidate_eval = evaluate_cost()    
+
+            # check for new best solution
+            if candidate_eval < best_eval:
+                # store new best point
+                best_eval = candidate_eval
+                best = deepcopy(case_param.production)
+                # report progress
+                print('>%d f(%s) = %.5f' % (i, best, best_eval))
+                current_list = [str(j) + "-" + str(i),candidate_eval,True,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
+                text_file.write("\n%s" % str(current_list))
+            # difference between candidate and current point evaluation
+            diff = candidate_eval - curr_eval
+            # calculate temperature for current epoch
+            #t = temp / float(i + 1)
+            t = alpha_param * t
+            #t = t / (1 + beta_param * t)
+            # calculate metropolis acceptance criterion
+            # This is absolutely necessary
+            print("-diff/t:\t", (-diff/t))
+            metropolis = exp(-diff / t)
+            # check if we should keep the new point
+            if diff < 0 or rand() < metropolis:
+                # store the new current point
+                curr_eval = candidate_eval
+                curr = deepcopy(case_param.production)
+            else:
+                case_param.production = deepcopy(curr)
+        text_file.close()
+
+def constrain_check():
+    # Now there is surely a valid reason to run a rroutine to check for constrains
+    # Basically is a combination of the capacity check and the positive check
+    # May be able to add more checks if needed.
+    pass_check = True
+    below_max_cap = True
+    all_pos = True
+    for plant in case_param.plant:
+        if not capacity_check(plant):
+            below_max_cap = False
+        if not sanity_check(plant):
+            all_pos = False
+    if (not below_max_cap) or (not all_pos):
+        # Well if the maximum capacity is exceeded, reset the state and continue
+        pass_check = False
+    return pass_check
+
+def gen_sa_candidate(step_size, amount_change):
+    # Technically what we need is just the step_size, may not even 
+    """
+    # Update rule:
+    We randomly generate a list of combinations to alter for each generation of candidate,
+    We also limit the number of changes for each new candidate, this is to ensure the candidate
+    is not differ from the previous best candidate by too much, effectively a Monte-Carlo method is 
+    disguise. Make it sensible.
+    """
+    
+    # Here we generate the list of udpate to be made
+
+    # What we need. Here we can reuse the updater for Hooke and Jeeves
+
+    # Consider adding a hard-stop to prevent stack overflow
+    mode_list = [1,2,3]
+    for i in range(0, amount_change):
+        # Update rule will need to consider the constrains
+        candidate_backup = deepcopy(case_param.production)
+        product = case_param.product[randint(0,len(case_param.product)-1)]
+        customer = case_param.customer[randint(0,len(case_param.customer)-1)]
+        plant = case_param.plant[randint(0,len(case_param.plant)-1)]
+        mode = mode_list[randint(0,len(mode_list)-1)]
+        # Just lazy to look up the API documentation
+        movement_direction = randint(0,1)
+        if movement_direction == 0:
+            movement_direction -= 1
+        movement = step_size * movement_direction
+        hooke_jeeves_updater(product,customer,plant,mode,movement)
+        # We don't do cost check here because it's irrelevant
+        if not constrain_check():
+            # If the constrain is exceeded, we revert the production to the previous set,
+            # and at the same time we reduce the counter
+            i -= 1
+            case_param.production = deepcopy(candidate_backup)
