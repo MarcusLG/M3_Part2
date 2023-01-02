@@ -93,7 +93,7 @@ def simple_local_iterator(num_iter, rand_initializer=True, debug=False, record_b
         # Golden will serve as a copy of the previous state
         golden_production = deepcopy(case_param.production)
         # Next will hold the production quantities that to be updated with
-        next_production = deepcopy(case_param.production)
+        prev_best_production = deepcopy(case_param.production)
         prev_best_cost = evaluate_cost() # Save the cost, i.e. best cost so far to be compared with
         update_flag = False
         #if current_iter % print_iter_interval == 0:
@@ -104,10 +104,10 @@ def simple_local_iterator(num_iter, rand_initializer=True, debug=False, record_b
             for customer in case_param.customer:
                 # For each set of product-customer pair, we perform the neighbour search
                 for mode in [1,2,3]:
-                    for movement in [-1,1,-2,2,-3,3,-4,4,-5,5,-6,6,-7,7,-8,8,-9,9,-10,10,-11,11,-12,12,-13,13]: # Here we only run movement search for 2 steps
+                    for movement in [-1,1,-2,2,-3,3,-4,4,-5,5]: # Here we only run movement search for 2 steps
                         for plant in ['A','B','C','D']:
                             # Here we pass the variables into the updater to update the value for the 
-                            total_iterations += 1
+                            
                             simple_local_updater(product,customer,plant,mode,movement)
                             current_cost = evaluate_cost()
                             if debug:
@@ -121,21 +121,29 @@ def simple_local_iterator(num_iter, rand_initializer=True, debug=False, record_b
                                     all_pos = False
                             if (not below_max_cap) or (not all_pos):
                                 # Well if the maximum capacity is exceeded, reset the state and continue
-                                case_param.production = deepcopy(next_production)
+                                case_param.production = deepcopy(prev_best_production)
                                 continue
                             # Only check the cost if the capacity is not exceeded
                             if current_cost < prev_best_cost:
                                 prev_best_cost = current_cost
-                                next_production = deepcopy(case_param.production)
-                                current_list = [str(movement) + "-" + str(current_iter),prev_best_cost,True,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
-                                text_file.write("\n%s" % str(current_list))
+                                #current_list = [str(movement) + "-" + str(current_iter),prev_best_cost,True,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
+                                #text_file.write("\n%s" % str(current_list))
+                                candidate_production = deepcopy(case_param.production)
+                                case_param.production = deepcopy(prev_best_production)
                                 update_flag = True # We set this flag to True if there's any improvement, else iteration will break
                             else:
-                                case_param.production = deepcopy(next_production)
-        case_param.production = deepcopy(next_production)
+                                case_param.production = deepcopy(prev_best_production)
         if not update_flag:
             print("No improvement.")
             break
+        else:
+            case_param.production = deepcopy(candidate_production)
+            prev_best_production = deepcopy(case_param.production)
+            current_cost = evaluate_cost()
+            if not record_best:
+                current_list = [current_iter,current_cost,True,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
+                text_file.write("\n%s" % str(current_list))
+        total_iterations += 1
     # End of iteration, restore the case_param.production to the best combination so far
     current_cost = evaluate_cost()
     current_list = [current_iter,current_cost,below_max_cap,case_param.production['A']['P']['H'],case_param.production['B']['P']['H'],case_param.production['C']['P']['H'],case_param.production['D']['P']['H'],case_param.production['A']['P']['J'],case_param.production['B']['P']['J'],case_param.production['C']['P']['J'],case_param.production['D']['P']['J'],case_param.production['A']['P']['L'],case_param.production['B']['P']['L'],case_param.production['C']['P']['L'],case_param.production['D']['P']['L'],case_param.production['A']['P']['T'],case_param.production['B']['P']['T'],case_param.production['C']['P']['T'],case_param.production['D']['P']['T'],case_param.production['A']['Q']['H'],case_param.production['B']['Q']['H'],case_param.production['C']['Q']['H'],case_param.production['D']['Q']['H'],case_param.production['A']['Q']['J'],case_param.production['B']['Q']['J'],case_param.production['C']['Q']['J'],case_param.production['D']['Q']['J'],case_param.production['A']['Q']['L'],case_param.production['B']['Q']['L'],case_param.production['C']['Q']['L'],case_param.production['D']['Q']['L'],case_param.production['A']['Q']['T'],case_param.production['B']['Q']['T'],case_param.production['C']['Q']['T'],case_param.production['D']['Q']['T'],case_param.production['A']['R']['H'],case_param.production['B']['R']['H'],case_param.production['C']['R']['H'],case_param.production['D']['R']['H'],case_param.production['A']['R']['J'],case_param.production['B']['R']['J'],case_param.production['C']['R']['J'],case_param.production['D']['R']['J'],case_param.production['A']['R']['L'],case_param.production['B']['R']['L'],case_param.production['C']['R']['L'],case_param.production['D']['R']['L'],case_param.production['A']['R']['T'],case_param.production['B']['R']['T'],case_param.production['C']['R']['T'],case_param.production['D']['R']['T'],case_param.production['A']['S']['H'],case_param.production['B']['S']['H'],case_param.production['C']['S']['H'],case_param.production['D']['S']['H'],case_param.production['A']['S']['J'],case_param.production['B']['S']['J'],case_param.production['C']['S']['J'],case_param.production['D']['S']['J'],case_param.production['A']['S']['L'],case_param.production['B']['S']['L'],case_param.production['C']['S']['L'],case_param.production['D']['S']['L'],case_param.production['A']['S']['T'],case_param.production['B']['S']['T'],case_param.production['C']['S']['T'],case_param.production['D']['S']['T']]
@@ -205,6 +213,26 @@ def func_cost(plant):
         	case_param.distance[plant]['J'] * gen_load(sum([case_param.production[plant]['P']['J'], case_param.production[plant]['Q']['J'], case_param.production[plant]['R']['J'], case_param.production[plant]['S']['J']])) + 
         	case_param.distance[plant]['L'] * gen_load(sum([case_param.production[plant]['P']['L'], case_param.production[plant]['Q']['L'], case_param.production[plant]['R']['L'], case_param.production[plant]['S']['L']])) + 
         	case_param.distance[plant]['T'] * gen_load(sum([case_param.production[plant]['P']['T'], case_param.production[plant]['Q']['T'], case_param.production[plant]['R']['T'], case_param.production[plant]['S']['T']]))))
+    return cost
+
+def evaluate_cost_feed(input_space):
+    # This is a more comprehensive version to compute the cost. 
+    # Will try to work on this alternative, if proven to work will deprecate the previous method.
+    # Made the change because need to allow computation of cost with alternative input variable space.
+    # Probably should have been the method to be implemented from the get-go, if I was smart enough lol.
+    # Also serves as the wrapper as there is no point to separate the two.
+    cost = 0
+    for plant in case_param.plant:
+        cost += (case_param.labour_cost[plant] * (
+                    case_param.labour_hours[plant]['P'] * sum(case_param.production[plant]['P'].values()) + 
+                    case_param.labour_hours[plant]['Q'] * sum(case_param.production[plant]['Q'].values()) +
+                    case_param.labour_hours[plant]['R'] * sum(case_param.production[plant]['R'].values()) +
+                    case_param.labour_hours[plant]['S'] * sum(case_param.production[plant]['S'].values())) +
+                case_param.cost_per_mile * (
+                    case_param.distance[plant]['H'] * gen_load(sum([case_param.production[plant]['P']['H'], case_param.production[plant]['Q']['H'], case_param.production[plant]['R']['H'], case_param.production[plant]['S']['H']])) + 
+                    case_param.distance[plant]['J'] * gen_load(sum([case_param.production[plant]['P']['J'], case_param.production[plant]['Q']['J'], case_param.production[plant]['R']['J'], case_param.production[plant]['S']['J']])) + 
+                    case_param.distance[plant]['L'] * gen_load(sum([case_param.production[plant]['P']['L'], case_param.production[plant]['Q']['L'], case_param.production[plant]['R']['L'], case_param.production[plant]['S']['L']])) + 
+                    case_param.distance[plant]['T'] * gen_load(sum([case_param.production[plant]['P']['T'], case_param.production[plant]['Q']['T'], case_param.production[plant]['R']['T'], case_param.production[plant]['S']['T']]))))
     return cost
 
 def evaluate_cost():
@@ -407,6 +435,7 @@ def hooke_jeeves_iterator(num_iter, rand_initializer=True, debug=False, record_b
 
 # simulated annealing algorithm
 def simulated_annealing(num_initialization, n_iterations, step_size, temp, overwrite=False):
+    time_start = time.time()
     for j in range(0, num_initialization):
         # generate an initial point
         #best = bounds[:, 0] + rand(len(bounds)) * (bounds[:, 1] - bounds[:, 0])    
@@ -433,7 +462,7 @@ def simulated_annealing(num_initialization, n_iterations, step_size, temp, overw
         else:
             text_file = open("Output_SA.csv", "a")
         text_file.write("\nCurrent_iter,current_cost,below_max_cap,APH,BPH,CPH,DPH,APJ,BPJ,CPJ,DPJ,APL,BPL,CPL,DPL,APT,BPT,CPT,DPT,AQH,BQH,CQH,DQH,AQJ,BQJ,CQJ,DQJ,AQL,BQL,CQL,DQL,AQT,BQT,CQT,DQT,ARH,BRH,CRH,DRH,ARJ,BRJ,CRJ,DRJ,ARL,BRL,CRL,DRL,ART,BRT,CRT,DRT,ASH,BSH,CSH,DSH,ASJ,BSJ,CSJ,DSJ,ASL,BSL,CSL,DSL,AST,BST,CST,DST")    
-
+        time_start = time.time()
         # run the algorithm
         for i in range(n_iterations):
             # take a step    
@@ -472,7 +501,11 @@ def simulated_annealing(num_initialization, n_iterations, step_size, temp, overw
                 curr = deepcopy(case_param.production)
             else:
                 case_param.production = deepcopy(curr)
+        time_stop = time.time()
+        print("Total time elapse: ", time_stop - time_start, "s\n")
+        print("Rate: ", (time_stop - time_start)/n_iterations, "s/iteration\n")
         text_file.close()
+
 
 def constrain_check():
     # Now there is surely a valid reason to run a rroutine to check for constrains

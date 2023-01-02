@@ -1,2 +1,2 @@
 import part2
-part2.mc_run_and_print(20)
+part2.mc_run_and_print(200000000)
